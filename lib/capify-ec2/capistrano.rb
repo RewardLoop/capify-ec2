@@ -46,7 +46,9 @@ Capistrano::Configuration.instance(:must_exist).load do
         if instance and instance.contact_point then
           port = ssh_options[:port] || 22 
           keys_option = '-i ' << ssh_options[:keys] * ' -i ' if ssh_options[:keys]
-          command = "ssh #{keys_option} -p #{port} #{user}@#{instance.contact_point}"
+          forward_option = fetch(:gateway, false) ? '-A' : ''
+          gateway = "-t #{fetch(:gateway)} ssh -A" if fetch(:gateway, false)
+          command = "ssh #{forward_option} #{keys_option} -p #{port} #{gateway} #{user}@#{instance.contact_point}"
           puts "Running `#{command}`"
           exec(command)
         else
